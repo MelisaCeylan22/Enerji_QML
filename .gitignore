@@ -1,9 +1,6 @@
 .venv/
 __pycache__/
 *.pyc
-data/raw/
-data/processed/
-outputs/
 *.ipynb_checkpoints/
 report/*.aux
 report/*.bbl

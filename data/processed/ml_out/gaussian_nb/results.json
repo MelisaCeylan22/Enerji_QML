@@ -1,0 +1,20 @@
+{
+  "model": "GaussianNB",
+  "label_col": "label",
+  "var_smoothing": 1e-09,
+  "n_features": 12,
+  "metrics": {
+    "threshold": 0.85,
+    "TP": 7918,
+    "TN": 389454,
+    "FP": 17680,
+    "FN": 0,
+    "accuracy": 0.957402927825911,
+    "precision": 0.3093210407063052,
+    "recall": 1.0,
+    "f1": 0.4724907506862394,
+    "error_rate": 0.042597072174089035,
+    "roc_auc": 0.9854937195124946,
+    "pr_auc": 0.401317790167258
+  }
+}

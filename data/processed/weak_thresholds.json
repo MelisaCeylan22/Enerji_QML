@@ -1,0 +1,20 @@
+{
+  "input_txt": "C:\\Users\\Melisa\\Desktop\\Enerji_QML\\data\\raw\\household_power_consumption.txt",
+  "train_ratio": 0.8,
+  "drift_window": 60,
+  "min_persist": 10,
+  "q_peak": 0.99,
+  "q_step": 0.995,
+  "q_resid": 0.995,
+  "q_pf_low": 0.01,
+  "q_v_low": 0.005,
+  "q_v_high": 0.995,
+  "thr_peak_gap": 4.974,
+  "thr_step_abs_dgap": 1.83,
+  "thr_drift_rollmean_gap": 2.9519333333333333,
+  "thr_resid_abs_wh": 53.46666666666667,
+  "thr_pf_low": 0.7518597048572727,
+  "thr_voltage_low": 230.83,
+  "thr_voltage_high": 249.1,
+  "use_voltage_rule": true
+}

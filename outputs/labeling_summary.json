@@ -1,0 +1,14 @@
+{
+  "input_rows_after_dropna": 2049280,
+  "split": "chronological",
+  "test_size": 0.2,
+  "quantile_q": 0.99,
+  "threshold_pq_train_global_active_power": 4.982,
+  "train_rows": 1639424,
+  "test_rows": 409856,
+  "label_pos_ratio_train": 0.01001571283572767,
+  "label_pos_ratio_test": 0.003674461274203623,
+  "label_pos_ratio_full": 0.00874746252342286,
+  "time_start": "2006-12-16 17:24:00",
+  "time_end": "2010-11-26 21:02:00"
+}

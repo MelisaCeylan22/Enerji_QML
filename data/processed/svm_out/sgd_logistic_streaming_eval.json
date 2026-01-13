@@ -1,0 +1,55 @@
+{
+  "config": {
+    "train_csv": "C:\\Users\\Melisa\\Desktop\\Enerji_QML\\data\\processed\\train_labeled_full.csv",
+    "test_csv": "C:\\Users\\Melisa\\Desktop\\Enerji_QML\\data\\processed\\test_labeled_full.csv",
+    "val_ratio_within_train": 0.2,
+    "time_features": {
+      "lags": [
+        1,
+        5,
+        15,
+        60
+      ],
+      "roll_feats": [
+        "Global_active_power",
+        "Voltage",
+        "Global_intensity"
+      ],
+      "roll_windows": [
+        5,
+        15,
+        60
+      ]
+    },
+    "model": {
+      "type": "SGDClassifier(log_loss)",
+      "alpha": 5e-06,
+      "epochs": 3,
+      "batch_size": 50000
+    },
+    "threshold": {
+      "selection": "F0.5 on VAL (0..1)",
+      "n_thresh": 81
+    },
+    "seed": 42
+  },
+  "best_threshold": 1.0,
+  "val_metrics": {
+    "roc_auc": 0.9065191476654517,
+    "pr_auc": 0.3508398174254181
+  },
+  "test_metrics": {
+    "tp": 7856,
+    "tn": 387538,
+    "fp": 19596,
+    "fn": 62,
+    "accuracy": 0.9526372599096017,
+    "precision": 0.2861722278886784,
+    "recall": 0.9921697398332913,
+    "f1": 0.4442182640655923,
+    "f0.5": 0.33365611674566364,
+    "error_rate": 0.047362740090398314,
+    "roc_auc": 0.9718812967379973,
+    "pr_auc": 0.2841442382020691
+  }
+}

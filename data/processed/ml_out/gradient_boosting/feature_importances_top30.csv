@@ -1,0 +1,13 @@
+feature,importance
+weak_score,0.981578088456978
+Voltage,0.012924000620476295
+gap_abs_diff,0.004245401961057841
+gap_rollmean,0.0011936608094054262
+Global_active_power,4.662948831555346e-05
+power_factor,1.221866376682266e-05
+Global_intensity,6.247063078226086e-20
+Global_reactive_power,0.0
+Sub_metering_1,0.0
+Sub_metering_2,0.0
+Sub_metering_3,0.0
+resid_wh,0.0

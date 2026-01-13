@@ -20,7 +20,6 @@ from sklearn.metrics import (
     average_precision_score,
 )
 
-
 # =========================
 # 0) AYARLAR (BURAYI DÜZENLE)
 # =========================
@@ -32,7 +31,6 @@ OUT_DIR = DATA_DIR / "lstm_ae_out"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 VAL_RATIO_WITHIN_TRAIN = 0.20
-
 LOOKBACK = 60
 
 EPOCHS = 20
@@ -128,7 +126,7 @@ def scan_thresholds(y_true: np.ndarray, scores: np.ndarray, thresholds: np.ndarr
     rows = []
     for t in thresholds:
         y_pred = (scores >= t).astype(int)
-        tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+        tn, fp, fn, tp = confusion_matrix(y_true, y_pred, labels=[0, 1]).ravel()
         acc = accuracy_score(y_true, y_pred)
         prec = precision_score(y_true, y_pred, zero_division=0)
         rec = recall_score(y_true, y_pred, zero_division=0)
@@ -163,13 +161,16 @@ def build_lstm_autoencoder(lookback: int, n_features: int) -> tf.keras.Model:
     return model
 
 
-def ds_normal_train(ds_xy: tf.data.Dataset) -> tf.data.Dataset:
+def ds_normal_train(ds_xy: tf.data.Dataset, batch_size: int) -> tf.data.Dataset:
     """
     Train only normal windows: label==0 (son adım etiketi 0)
-    Map -> (x, x) autoencoder hedefi
+    timeseries_dataset_from_array batch'li ürettiği için:
+      unbatch -> filter -> map -> batch
     """
-    ds = ds_xy.filter(lambda x, y: tf.equal(y, 0))
+    ds = ds_xy.unbatch()  # artık tek tek (x, y) gelir, y scalar olur
+    ds = ds.filter(lambda x, y: tf.equal(y, 0))  # scalar bool ✅
     ds = ds.map(lambda x, y: (x, x), num_parallel_calls=tf.data.AUTOTUNE)
+    ds = ds.batch(batch_size, drop_remainder=False)
     ds = ds.prefetch(tf.data.AUTOTUNE)
     return ds
 
@@ -177,7 +178,6 @@ def ds_normal_train(ds_xy: tf.data.Dataset) -> tf.data.Dataset:
 def ds_all_auto(ds_xy: tf.data.Dataset) -> tf.data.Dataset:
     """
     Val için AE loss izlemesi: tüm pencerelerde (x,x).
-    (İstersen sadece normal val ile de izleyebiliriz.)
     """
     ds = ds_xy.map(lambda x, y: (x, x), num_parallel_calls=tf.data.AUTOTUNE)
     ds = ds.prefetch(tf.data.AUTOTUNE)
@@ -192,9 +192,9 @@ def collect_scores(ds_xy: tf.data.Dataset, model: tf.keras.Model) -> tuple[np.nd
     score_list = []
 
     for batch_x, batch_y in ds_xy:
-        x_hat = model.predict(batch_x, verbose=0)
-        err = np.mean((batch_x.numpy() - x_hat) ** 2, axis=(1, 2))
-        score_list.append(err.astype(np.float32))
+        x_hat = model(batch_x, training=False)
+        err = tf.reduce_mean(tf.square(batch_x - x_hat), axis=[1, 2])  # (batch,)
+        score_list.append(err.numpy().astype(np.float32))
         y_true_list.append(batch_y.numpy().astype(np.int32))
 
     return np.concatenate(y_true_list), np.concatenate(score_list)
@@ -236,10 +236,9 @@ def main():
     ds_val_xy = make_ts_dataset(X_val, y_val_raw, LOOKBACK, BATCH_SIZE, shuffle=False)
     ds_te_xy  = make_ts_dataset(X_te,  y_te_raw,  LOOKBACK, BATCH_SIZE, shuffle=False)
 
-    ds_tr_ae  = ds_normal_train(ds_tr_xy)     # train only normal
-    ds_val_ae = ds_all_auto(ds_val_xy)        # monitor val reconstruction (optional)
+    ds_tr_ae  = ds_normal_train(ds_tr_xy, BATCH_SIZE)  # ✅ düzeltildi
+    ds_val_ae = ds_all_auto(ds_val_xy)
 
-    # model
     model = build_lstm_autoencoder(LOOKBACK, len(FEATURE_COLS))
     model.compile(
         optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),
@@ -252,7 +251,7 @@ def main():
     ]
 
     print("\nTraining LSTM Autoencoder (NORMAL windows only)...")
-    history = model.fit(
+    model.fit(
         ds_tr_ae,
         validation_data=ds_val_ae,
         epochs=EPOCHS,
@@ -264,7 +263,6 @@ def main():
     print("\nScoring VAL for threshold tuning...")
     y_val_true, val_scores = collect_scores(ds_val_xy, model)
 
-    # AUC metrics (score yüksek => anomali)
     try:
         val_roc = float(roc_auc_score(y_val_true, val_scores))
     except Exception:
@@ -297,7 +295,7 @@ def main():
     y_te_true, te_scores = collect_scores(ds_te_xy, model)
     y_te_pred = (te_scores >= best_t).astype(int)
 
-    tn, fp, fn, tp = confusion_matrix(y_te_true, y_te_pred).ravel()
+    tn, fp, fn, tp = confusion_matrix(y_te_true, y_te_pred, labels=[0, 1]).ravel()
     acc  = float(accuracy_score(y_te_true, y_te_pred))
     prec = float(precision_score(y_te_true, y_te_pred, zero_division=0))
     rec  = float(recall_score(y_te_true, y_te_pred, zero_division=0))

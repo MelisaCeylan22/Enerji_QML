@@ -1,0 +1,44 @@
+{
+  "model": "AdaBoostClassifier(tuned)",
+  "features": [
+    "Global_active_power",
+    "Global_reactive_power",
+    "Voltage",
+    "Global_intensity",
+    "Sub_metering_1",
+    "Sub_metering_2",
+    "Sub_metering_3",
+    "gap_rollmean",
+    "gap_abs_diff",
+    "resid_wh",
+    "power_factor",
+    "weak_score"
+  ],
+  "val_ratio_within_train": 0.2,
+  "beta": 1.0,
+  "best_threshold_val": 0.45,
+  "ada_params": {
+    "n_estimators": 400,
+    "learning_rate": 0.08,
+    "random_state": 42
+  },
+  "base_estimator": {
+    "type": "DecisionTreeClassifier",
+    "max_depth": 3,
+    "min_samples_leaf": 50
+  },
+  "test_metrics": {
+    "threshold": 0.45,
+    "TP": 7918,
+    "TN": 407134,
+    "FP": 0,
+    "FN": 0,
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "error_rate": 0.0,
+    "roc_auc": 1.0,
+    "pr_auc": 1.0
+  }
+}
